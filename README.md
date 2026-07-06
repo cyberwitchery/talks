@@ -10,5 +10,4 @@ upstream.
 ## index
 
 - **dknog-2026** — "alembic demo", the live-demo half of a data-model-first
-  network-automation talk (dknog 2026). runnable fixtures live in the alembic
-  repo under `examples/talks/dknog-2026/`.
+  network-automation talk (dknog 2026).
