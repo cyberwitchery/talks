@@ -9,5 +9,5 @@ upstream.
 
 ## index
 
-- **dknog-2026** — "alembic demo", the live-demo half of a data-model-first
+- **dknog-2026**: "alembic demo", the live-demo half of a data-model-first
   network-automation talk (dknog 2026).
