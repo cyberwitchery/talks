@@ -1,0 +1,9 @@
+#!/bin/sh
+# runs the containerlab adapter on the lab host. alembic speaks json to it over
+# stdin/stdout, so ssh is all the transport it needs.
+#
+#   LAB_HOST     ssh host that runs containerlab (default: spark)
+#   LAB_KEY      ssh identity for it, when the ssh config does not set one
+#   LAB_ADAPTER  the adapter binary there (default: bin/denog/alembic-adapter-containerlab)
+exec ssh -T -o BatchMode=yes ${LAB_KEY:+-i "$LAB_KEY" -o IdentitiesOnly=yes} \
+  "${LAB_HOST:-spark}" sudo "${LAB_ADAPTER:-bin/denog/alembic-adapter-containerlab}"

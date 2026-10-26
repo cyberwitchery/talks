@@ -1,0 +1,4 @@
+# the local netbox. the token comes from NETBOX_TOKEN, which setup.sh writes
+# to .state/netbox-token.
+backend: netbox
+url: http://localhost:8018

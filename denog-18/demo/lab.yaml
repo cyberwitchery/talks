@@ -1,0 +1,24 @@
+# the lab as containerlab describes it: two sr linux spines, two alpine
+# leaves, five links. setup.sh maps this into netbox, so netbox starts out
+# describing the network while the lab itself is empty.
+include: [schemas/lab.yaml]
+objects:
+  - { uid: d0000000-0000-0000-0000-000000000001, type: dcim.device, key: { name: spine01 }, attrs: { name: spine01, kind: nokia_srlinux, image: "ghcr.io/nokia/srlinux:latest" } }
+  - { uid: d0000000-0000-0000-0000-000000000002, type: dcim.device, key: { name: spine02 }, attrs: { name: spine02, kind: nokia_srlinux, image: "ghcr.io/nokia/srlinux:latest" } }
+  - { uid: d0000000-0000-0000-0000-000000000003, type: dcim.device, key: { name: leaf01 }, attrs: { name: leaf01, kind: linux, image: "alpine:3", cmd: sleep infinity } }
+  - { uid: d0000000-0000-0000-0000-000000000004, type: dcim.device, key: { name: leaf02 }, attrs: { name: leaf02, kind: linux, image: "alpine:3", cmd: sleep infinity } }
+  - { uid: e0000000-0000-0000-0000-000000000001, type: dcim.interface, key: { device: d0000000-0000-0000-0000-000000000001, name: e1-1 }, attrs: { name: e1-1, device: d0000000-0000-0000-0000-000000000001 } }
+  - { uid: e0000000-0000-0000-0000-000000000002, type: dcim.interface, key: { device: d0000000-0000-0000-0000-000000000003, name: eth1 }, attrs: { name: eth1, device: d0000000-0000-0000-0000-000000000003 } }
+  - { uid: e0000000-0000-0000-0000-000000000003, type: dcim.interface, key: { device: d0000000-0000-0000-0000-000000000001, name: e1-2 }, attrs: { name: e1-2, device: d0000000-0000-0000-0000-000000000001 } }
+  - { uid: e0000000-0000-0000-0000-000000000004, type: dcim.interface, key: { device: d0000000-0000-0000-0000-000000000004, name: eth1 }, attrs: { name: eth1, device: d0000000-0000-0000-0000-000000000004 } }
+  - { uid: e0000000-0000-0000-0000-000000000005, type: dcim.interface, key: { device: d0000000-0000-0000-0000-000000000002, name: e1-1 }, attrs: { name: e1-1, device: d0000000-0000-0000-0000-000000000002 } }
+  - { uid: e0000000-0000-0000-0000-000000000006, type: dcim.interface, key: { device: d0000000-0000-0000-0000-000000000003, name: eth2 }, attrs: { name: eth2, device: d0000000-0000-0000-0000-000000000003 } }
+  - { uid: e0000000-0000-0000-0000-000000000007, type: dcim.interface, key: { device: d0000000-0000-0000-0000-000000000002, name: e1-2 }, attrs: { name: e1-2, device: d0000000-0000-0000-0000-000000000002 } }
+  - { uid: e0000000-0000-0000-0000-000000000008, type: dcim.interface, key: { device: d0000000-0000-0000-0000-000000000004, name: eth2 }, attrs: { name: eth2, device: d0000000-0000-0000-0000-000000000004 } }
+  - { uid: e0000000-0000-0000-0000-000000000009, type: dcim.interface, key: { device: d0000000-0000-0000-0000-000000000003, name: eth3 }, attrs: { name: eth3, device: d0000000-0000-0000-0000-000000000003 } }
+  - { uid: e0000000-0000-0000-0000-000000000010, type: dcim.interface, key: { device: d0000000-0000-0000-0000-000000000004, name: eth3 }, attrs: { name: eth3, device: d0000000-0000-0000-0000-000000000004 } }
+  - { uid: f0000000-0000-0000-0000-000000000001, type: dcim.cable, key: { label: c1 }, attrs: { label: c1, a_terminations: [e0000000-0000-0000-0000-000000000001], b_terminations: [e0000000-0000-0000-0000-000000000002] } }
+  - { uid: f0000000-0000-0000-0000-000000000002, type: dcim.cable, key: { label: c2 }, attrs: { label: c2, a_terminations: [e0000000-0000-0000-0000-000000000003], b_terminations: [e0000000-0000-0000-0000-000000000004] } }
+  - { uid: f0000000-0000-0000-0000-000000000003, type: dcim.cable, key: { label: c3 }, attrs: { label: c3, a_terminations: [e0000000-0000-0000-0000-000000000005], b_terminations: [e0000000-0000-0000-0000-000000000006] } }
+  - { uid: f0000000-0000-0000-0000-000000000004, type: dcim.cable, key: { label: c4 }, attrs: { label: c4, a_terminations: [e0000000-0000-0000-0000-000000000007], b_terminations: [e0000000-0000-0000-0000-000000000008] } }
+  - { uid: f0000000-0000-0000-0000-000000000005, type: dcim.cable, key: { label: peer }, attrs: { label: peer, a_terminations: [e0000000-0000-0000-0000-000000000009], b_terminations: [e0000000-0000-0000-0000-000000000010] } }

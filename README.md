@@ -11,3 +11,6 @@ upstream.
 
 - **dknog-2026**: "alembic demo", the live-demo half of a data-model-first
   network-automation talk (dknog 2026).
+- **denog-18**: "network automation for the modern age", data-model-driven
+  automation with alembic as the case study, and a live deploy-and-drift demo
+  between netbox and containerlab (denog 18).

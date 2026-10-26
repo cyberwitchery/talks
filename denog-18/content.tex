@@ -1,0 +1,264 @@
+  \section{hi.}
+  \begin{frame}{i’m veit}
+    \begin{itemize}
+      \item i build software, often network automation or security things.
+      \item don’t let me near a router cli.
+      \item i’ve been doing network automation for entirely too long.
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}{i’m grateful for}
+    \vfill
+    \begin{center}
+      \begin{tabular}{@{}c@{\hspace{0.08\paperwidth}}c@{\hspace{0.08\paperwidth}}c@{}}
+        $\vcenter{\hbox{\includegraphics[height=0.3\paperheight]{img/port-zero}}}$ &
+        $\vcenter{\hbox{\cwlogo[cwInk]{0.3\paperheight}}}$ &
+        $\vcenter{\hbox{\includegraphics[width=0.22\paperwidth]{img/leim}}}$
+      \end{tabular}
+    \end{center}
+    \vfill
+  \end{frame}
+
+	\begin{frame}{today’s menu}
+    \begin{itemize}
+      \item past and present \textcolor{cwFaint}{(how we got here)}
+      \item an idea \textcolor{cwFaint}{(the model in the middle)}
+      \item an example \textcolor{cwFaint}{(alembic)}
+      \item a demo \textcolor{cwFaint}{(deploy \& drift)}
+      \item tradeoffs \textcolor{cwFaint}{(no free lunch, yo)}
+    \end{itemize}
+	\end{frame}
+  % ==================================================================
+  \section{recap}
+  % manual -> source of truth + small automations -> glue in the middle
+  % ==================================================================
+  \begin{frame}{by hand}
+    \begin{itemize}
+      \item ssh into the box, type the config.
+      \item fat-finger something, find out later.
+      \item forget what we did and why.
+      \item learn how to resuce things really well.
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}{write it down and script it}
+    \begin{itemize}
+			\item document the setup in a \tealaccent{source of truth} (often >1).
+      \item write small automations against it using salt, ansible, templates.
+      \item \textcolor{cwFaint}{this is where most of us still are today.}
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}{what that left us}
+    \vfill
+    \begin{center}
+      \begin{tikzpicture}[node distance=0.4cm]
+        \node[sys] (a) {netbox};
+        \node[sys, right=of a] (b) {ansible};
+        \node[sys, right=of b] (c) {containerlab};
+        \node[sys, right=of c] (d) {prometheus};
+        \node[sys, right=of d] (e) {dns};
+      \end{tikzpicture}
+    \end{center}
+    \vskip6pt
+    \begin{itemize}
+      \item bespoke code in the middle.
+      \item too many systems that don't talk to each other.
+      \item our model has to fit the vendor world.
+    \end{itemize}
+    \vfill
+  \end{frame}
+
+  \begin{frame}{the vendor answer}
+    \hero{buy \tealaccent{another box} that talks to their stack, and to the
+		systems they consider important.}
+    \subhero{works as long as you stay inside their world.}
+  \end{frame}
+
+  % ==================================================================
+  \section{a model of our own}
+  % why we end up with one anyway
+  % ==================================================================
+  \begin{frame}{the model we actually work from}
+    \begin{itemize}
+      \item the source of truth's object model,
+      \item plus custom fields and plugins,
+      \item plus the spreadsheet on a samba share,
+      \item plus concepts that only live in people's heads.
+    \end{itemize}
+    \subhero{i think most of us end up with our own model anyway.}
+  \end{frame}
+
+  \begin{frame}[fragile]{an example}
+    \vfill
+\begin{lstlisting}
+dcim.device:
+  key: { name: { type: slug } }
+  fields:
+    name:  { type: slug }
+    kind:  { type: string }
+    image: { type: string }
+    cmd:   { type: string }
+\end{lstlisting}
+    \vskip6pt
+    \subhero{a lab node needs a kind, an image, and a command. netbox has none
+    of them, so they end up in custom fields, config contexts, or a script.}
+    \vfill
+  \end{frame}
+
+  \begin{frame}{the model is already there}
+    \hero{every integration already decides what devices to look at,
+    which fields matter, and \tealaccent{what gets dropped}.}
+    \subhero{the model exists somewhere in the aether.}
+  \end{frame}
+
+  % ==================================================================
+  \section{the model in the middle}
+  % n x m -> n, every operation is a transform
+  % ==================================================================
+  \begin{frame}{a different center}
+    \hero{put \tealaccent{your data model} in the middle,
+    and transform every system into and out of it.}
+  \end{frame}
+
+  \begin{frame}{one transform per system}
+    \vfill
+    \begin{center}
+      \begin{tikzpicture}[dot/.style={circle, fill=cwBody, inner sep=1.5pt}]
+        \begin{scope}
+          \foreach \i in {0,...,5} \coordinate (l\i) at (90+60*\i:1.3);
+          \foreach \i in {0,...,4} {
+            \pgfmathtruncatemacro{\n}{\i+1}
+            \foreach \j in {\n,...,5} \draw[edge] (l\i) -- (l\j);
+          }
+          \foreach \i in {0,...,5} \node[dot] at (l\i) {};
+          \node[font=\scriptsize, text=cwMuted] at (0,-1.9) {point to point: n $\times$ m};
+        \end{scope}
+        \begin{scope}[xshift=6cm]
+          \foreach \i in {0,...,5} \coordinate (r\i) at (90+60*\i:1.3);
+          \foreach \i in {0,...,5} \draw[edge] (0,0) -- (r\i);
+          \foreach \i in {0,...,5} \node[dot] at (r\i) {};
+          \node[fill=cwGround, text=cwTeal, font=\scriptsize\bfseries,
+            inner sep=3pt] at (0,0) {model};
+          \node[font=\scriptsize, text=cwMuted] at (0,-1.9) {model in the middle: n};
+        \end{scope}
+      \end{tikzpicture}
+    \end{center}
+		\subhero{a new system is one transform (or two),
+    not one per system it talks to.}
+    \vfill
+  \end{frame}
+
+  \begin{frame}{every operation is a transform}
+    \begin{itemize}
+      \item \textbf{deploy}: netbox $\to$ containerlab, ansible, prometheus.
+			\item \textbf{drift}: containerlab $\to$ netbox (just check).
+			\item \textbf{migration}: netbox $\to$ nautobot. (you can even run both for a while,
+				then cut over.)
+    \end{itemize}
+    \subhero{it’s all the same thing!}
+  \end{frame}
+
+  \begin{frame}{a compiler for your infra}
+    \hero{many frontends, many backends.\\[0.3em]
+    the part that unifies them is \tealaccent{the data and its types}.}
+    \subhero{what you need is a system that is good at defining data models
+    and transforming between them.}
+  \end{frame}
+
+  % ==================================================================
+  \section{alembic}
+  % the case study, then the demo
+  % ==================================================================
+  \begin{frame}{a case study}
+    \begin{itemize}
+      \item our attempt at the idea, to see whether it holds up.
+      \item \tealaccent{open core}: model, engine, and dcim / ipam adapters.
+      \item commercial adapters for fabric and ops.
+    \end{itemize}
+    \subhero{this is just one way to try it.}
+  \end{frame}
+
+  \begin{frame}[fragile]{set the shape once}
+    \vfill
+\begin{lstlisting}
+types:
+  dcim.device:
+    key:
+      name:   { type: slug }
+    fields:
+      name:   { type: string }
+      site:   { type: ref, target: dcim.site }
+      role:   { type: ref, target: dcim.device_role }
+      status: { type: string }
+\end{lstlisting}
+    \subhero{your types and fields and reference.}
+    \vfill
+  \end{frame}
+
+  \begin{frame}[fragile]{total control}
+    \vfill
+\begin{lstlisting}
+$ alembic plan -f core-v1.yaml -o plan.json
+plan: 5 to create, 0 to update, 0 to delete
+plan written to plan.json
+\end{lstlisting}
+    \vskip6pt
+    \subhero{reading, mapping, planning, and finally applying.}
+    \vfill
+  \end{frame}
+
+  \begin{frame}{demo time!}
+    \vfill
+    \begin{center}
+      \begin{tikzpicture}
+        \node[sys, minimum width=2.6cm] (a) {netbox};
+        \node[sys, minimum width=2.6cm, right=4cm of a] (c) {containerlab};
+        \draw[edge, -{Stealth[length=5pt]}] ([yshift=5pt]a.east) -- ([yshift=5pt]c.west)
+          node[midway, above=2pt, font=\scriptsize, text=cwTeal] {deploy};
+        \draw[edge, -{Stealth[length=5pt]}] ([yshift=-5pt]c.west) -- ([yshift=-5pt]a.east)
+          node[midway, below=2pt, font=\scriptsize, text=cwTeal] {drift};
+      \end{tikzpicture}
+    \end{center}
+    \subhero{deploy a lab from netbox, change the lab manually.}
+    \vfill
+  \end{frame}
+
+	\livecode{deploy \& drift.}
+
+  % ==================================================================
+  \section{trade-offs}
+  % you own the engineering
+  % ==================================================================
+  \begin{frame}{you own the engineering}
+    \begin{itemize}
+      \item[\textcolor{cwFaint}{\textbar}] \textcolor{cwMuted}{all in on a vendor:
+        excellent interoperability out of the box as long as you color inside
+        the lines.}
+      \item[\textcolor{cwTeal}{\textbar}] own the model, make it the shape you
+        want, and \tealaccent{more decisions that you own}.
+      \item[\textcolor{cwFaint}{\textbar}] with great power comes great
+        responsbility.
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}{reinventing the universe}
+    \hero{a bespoke model can mean\\[0.3em]
+    \tealaccent{modelling everything from scratch}.}
+    \subhero{expressiveness and recipes help, but teams can get stuck in
+    design limbo.}
+  \end{frame}
+
+  \begin{frame}{it only pays off at a certain size}
+    \hero{that size gets \tealaccent{smaller} as tools get better.}
+    \subhero{it’s never zero.}
+  \end{frame}
+
+  \begin{frame}{takeaways}
+    \begin{itemize}
+			\item if you own the model, the transforms get easier.
+      \item don’t focus on the boxes, focus on \tealaccent{the edges between them}.
+			\item think about the shape of your data, and don’t take anything as
+				gospel.
+		\end{itemize}
+  \end{frame}

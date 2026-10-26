@@ -1,0 +1,10 @@
+# the lab on the lab host, driven by the containerlab adapter there over ssh
+# (bin/lab-adapter). sr linux takes its time to boot, hence the timeout.
+backend: external
+command: bin/lab-adapter
+timeout_seconds: 600
+setup:
+  mode: drive
+  out_path: labs/denog/topology.clab.yml
+  name: denog
+  command_prefix: [sudo]

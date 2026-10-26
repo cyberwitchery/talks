@@ -1,0 +1,64 @@
+# a plain netbox for the demo, on localhost:8018. local demo only: every
+# secret here is a fixed placeholder.
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: netbox
+      POSTGRES_USER: netbox
+      POSTGRES_PASSWORD: netbox
+    volumes:
+      - postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U netbox -d netbox"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: valkey/valkey:9.0-alpine
+    command: ["valkey-server", "--requirepass", "netbox"]
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -a netbox ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  netbox:
+    image: docker.io/netboxcommunity/netbox:v4.6.2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8018:8080"
+    environment:
+      ALLOWED_HOSTS: "*"
+      DB_HOST: postgres
+      DB_NAME: netbox
+      DB_USER: netbox
+      DB_PASSWORD: netbox
+      REDIS_HOST: redis
+      REDIS_PASSWORD: netbox
+      REDIS_CACHE_HOST: redis
+      REDIS_CACHE_PASSWORD: netbox
+      SECRET_KEY: "denog18-demo-secret-0123456789abcdef0123456789abcdef"
+      API_TOKEN_PEPPER_1: "denog18-demo-pepper-0123456789abcdef0123456789abcdef0123456789"
+      SUPERUSER_NAME: admin
+      SUPERUSER_EMAIL: admin@example.invalid
+      SUPERUSER_PASSWORD: admin
+      SKIP_SUPERUSER: "false"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "code=$$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/); [ \"$$code\" = 200 ] || [ \"$$code\" = 403 ]",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+volumes:
+  postgres:
