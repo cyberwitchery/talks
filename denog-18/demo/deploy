@@ -1,0 +1,13 @@
+#!/bin/sh
+# netbox → lab: read netbox, reshape it into the lab's model, plan, apply, and
+# show what is running.
+. "$(dirname "$0")/common.sh"
+
+step "read netbox" \
+  bin/alembic import -f schemas/netbox.yaml --backend-config backends/netbox.yaml -o netbox.json
+step "map it into the lab's model" \
+  bin/alembic map -f netbox.json --spec maps/netbox-to-lab.yaml -o lab.json
+step "plan against the lab" \
+  bin/alembic plan -f lab.json --backend-config backends/lab.yaml -o plan.json
+step "apply the plan" \
+  bin/alembic apply -p plan.json --backend-config backends/lab.yaml

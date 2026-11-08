@@ -11,13 +11,13 @@ schema:
       fields:
         name: { type: string }
         slug: { type: slug }
-    dcim.device_type:
+    dcim.devicetype:
       key: { slug: { type: slug } }
       fields:
         manufacturer: { type: ref, target: dcim.manufacturer }
         model: { type: string }
         slug: { type: slug }
-    dcim.device_role:
+    dcim.devicerole:
       key: { slug: { type: slug } }
       fields:
         name: { type: string }
@@ -32,8 +32,8 @@ schema:
       fields:
         name: { type: slug }
         site: { type: ref, target: dcim.site }
-        role: { type: ref, target: dcim.device_role }
-        device_type: { type: ref, target: dcim.device_type }
+        role: { type: ref, target: dcim.devicerole }
+        device_type: { type: ref, target: dcim.devicetype }
         platform: { type: ref, target: dcim.platform, nullable: true }
         status: { type: string }
     dcim.interface:

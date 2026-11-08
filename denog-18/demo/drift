@@ -1,0 +1,14 @@
+#!/bin/sh
+# lab → netbox: read the running lab, reshape it into netbox's model, and report
+# how netbox differs. exits 2 when it finds drift.
+. "$(dirname "$0")/common.sh"
+
+step "read the lab" \
+  bin/alembic import -f schemas/lab.yaml --backend-config backends/lab.yaml -o observed.json
+step "map it into netbox's model" \
+  bin/alembic map -f observed.json --spec maps/lab-to-netbox.yaml -o drift.json
+# --report saves no state, so it would list every object it matches by key on
+# stderr, every run
+printf '\n\033[1m%s\033[0m\n$ %s\n' "compare with netbox" \
+  "bin/alembic plan -f drift.json --backend-config backends/netbox.yaml --report 2>/dev/null"
+bin/alembic plan -f drift.json --backend-config backends/netbox.yaml --report 2>/dev/null

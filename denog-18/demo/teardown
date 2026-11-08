@@ -1,0 +1,16 @@
+#!/bin/sh
+# empties the lab for another run of ./deploy: destroys it on the lab host and
+# forgets alembic's state for it. netbox stays as it is, the demo only reads it.
+#
+#   LAB_HOST     ssh host that runs containerlab (default: spark)
+#   LAB_KEY      ssh identity for it, when the ssh config does not set one
+set -eu
+cd "$(dirname "$0")"
+LAB_HOST="${LAB_HOST:-spark}"
+topology=labs/denog/topology.clab.yml
+
+ssh -T -o BatchMode=yes ${LAB_KEY:+-i "$LAB_KEY" -o IdentitiesOnly=yes} "$LAB_HOST" \
+  "sudo containerlab destroy -t $topology --cleanup >/dev/null 2>&1; sudo rm -f $topology; mkdir -p labs/denog" \
+  || { echo "cannot reach $LAB_HOST; set LAB_KEY, or an IdentityFile in the ssh config" >&2; exit 1; }
+rm -rf .alembic netbox.json lab.json plan.json observed.json drift.json
+echo "the lab is empty; next: ./deploy"

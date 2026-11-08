@@ -14,13 +14,13 @@ schema:
       fields:
         name: { type: string }
         slug: { type: slug }
-    dcim.device_type:
+    dcim.devicetype:
       key: { slug: { type: slug } }
       fields:
         manufacturer: { type: ref, target: dcim.manufacturer }
         model: { type: string }
         slug: { type: slug }
-    dcim.device_role:
+    dcim.devicerole:
       key: { slug: { type: slug } }
       fields:
         name: { type: string }
@@ -35,8 +35,8 @@ schema:
       fields:
         name: { type: slug }
         site: { type: ref, target: dcim.site }
-        role: { type: ref, target: dcim.device_role }
-        device_type: { type: ref, target: dcim.device_type }
+        role: { type: ref, target: dcim.devicerole }
+        device_type: { type: ref, target: dcim.devicetype }
         platform: { type: ref, target: dcim.platform }
         status: { type: string }
     dcim.interface:
@@ -70,22 +70,22 @@ objects:
     key: { slug: alpine }
     attrs: { name: Alpine, slug: alpine }
     uid: { v5: { type: dcim.manufacturer, stable: alpine } }
-  - type: dcim.device_type
+  - type: dcim.devicetype
     key: { slug: srlinux }
     attrs: { model: SR Linux, slug: srlinux, manufacturer: f9c29e16-5035-5d23-8581-5da6b71848f6 }  # nokia
-    uid: { v5: { type: dcim.device_type, stable: srlinux } }
-  - type: dcim.device_type
+    uid: { v5: { type: dcim.devicetype, stable: srlinux } }
+  - type: dcim.devicetype
     key: { slug: alpine }
     attrs: { model: Alpine Linux, slug: alpine, manufacturer: 4d912007-a628-5f16-b7b8-4c9c0088af35 }  # alpine
-    uid: { v5: { type: dcim.device_type, stable: alpine } }
-  - type: dcim.device_role
+    uid: { v5: { type: dcim.devicetype, stable: alpine } }
+  - type: dcim.devicerole
     key: { slug: spine }
     attrs: { name: Spine, slug: spine }
-    uid: { v5: { type: dcim.device_role, stable: spine } }
-  - type: dcim.device_role
+    uid: { v5: { type: dcim.devicerole, stable: spine } }
+  - type: dcim.devicerole
     key: { slug: leaf }
     attrs: { name: Leaf, slug: leaf }
-    uid: { v5: { type: dcim.device_role, stable: leaf } }
+    uid: { v5: { type: dcim.devicerole, stable: leaf } }
   - type: dcim.platform
     key: { slug: linux }
     attrs: { name: Linux, slug: linux }
@@ -99,8 +99,8 @@ rules:
     match: "dcim.device"
     uids:
       site: { v5: { type: dcim.site, stable: fra1 } }
-      role: { v5: { type: dcim.device_role, stable: "${attrs.name|role}" } }
-      device_type: { v5: { type: dcim.device_type, stable: "${attrs.image|type_slug}" } }
+      role: { v5: { type: dcim.devicerole, stable: "${attrs.name|role}" } }
+      device_type: { v5: { type: dcim.devicetype, stable: "${attrs.image|type_slug}" } }
       platform: { v5: { type: dcim.platform, stable: "${attrs.kind}" } }
     emit:
       type: dcim.device
