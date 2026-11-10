@@ -1,0 +1,4 @@
+# a bind zone, over axfr and rfc 2136.
+# listed only; the adapter is not installed.
+backend: external
+command: /usr/local/bin/alembic-adapter-dns

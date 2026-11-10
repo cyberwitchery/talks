@@ -1,0 +1,4 @@
+# prometheus file_sd targets.
+# listed only; the adapter is not installed.
+backend: external
+command: /usr/local/bin/alembic-adapter-prometheus

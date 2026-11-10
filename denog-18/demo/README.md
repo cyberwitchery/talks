@@ -1,8 +1,7 @@
 # demo: deploy and drift
 
-a lab described in netbox is deployed to containerlab, a link is removed from
-the running lab by hand, and the inverse path (containerlab to netbox) shows
-the drift. then the forward path puts the link back.
+deploy a lab from netbox to containerlab, pull a cable by hand, find the drift
+on the way back, and deploy again.
 
 ```text
 netbox  → map → containerlab     deploy
@@ -11,15 +10,17 @@ netbox ← map ← containerlab      drift
 
 ## what runs where
 
-- **the lab host** (`LAB_HOST`, default `spark`): containerlab and the
-  containerlab adapter, at `bin/denog/alembic-adapter-containerlab`. the lab is
-  `denog`: two sr linux spines, two alpine leaves, five links (`lab.yaml`).
-  alembic runs the adapter over ssh (`bin/lab-adapter`).
-- **this machine**: netbox 4.6.2 on http://localhost:8018 (`compose.yml`),
-  and alembic 0.13.0 at `bin/alembic`, the version the adapter is built
-  against.
+- **the lab host** (`LAB_HOST`, default `denog-lab`): containerlab, with the
+  adapters in `bin/denog/`. the lab `denog` has two sr linux spines, two alpine
+  leaves and five links (`lab.yaml`). alembic runs the adapters over ssh
+  (`bin/`).
+- **the monitoring**, also on the lab host: blackbox, prometheus and grafana
+  (`monitoring/`), on containerlab's management network. `setup.sh` copies it
+  over, `./monitor` starts it.
+- **this machine**: netbox 4.6.2 with the alembic plugin on
+  http://localhost:8018, and alembic 0.13.0 at `bin/alembic`.
 
-the containerlab adapter is part of the commercial alembic-ops layer, so it is
+the containerlab and prometheus adapters are part of alembic-ops, so they are
 not in this repo.
 
 ## setup
@@ -31,31 +32,26 @@ mv alembic-v0.13.0-aarch64-apple-darwin/alembic bin/ && rm -r alembic-v0.13.0-aa
 ./setup.sh                 # empty lab, fresh netbox that describes the network
 ```
 
-every script reaches the lab host with `ssh $LAB_HOST`. `LAB_KEY=<path>`
-passes an ssh identity when the ssh config does not set one. run `./setup.sh`
-again after a rehearsal.
+`LAB_KEY=<path>` sets the ssh identity if the ssh config does not. run
+`./setup.sh` again after a rehearsal.
 
 ## on stage
 
-one script per step. each prints the full command it runs, then its output.
+one script per step. each prints its commands.
 
-**0. the network is in netbox.** show devices and cables at
-http://localhost:8018/dcim/cables/. the lab is empty.
+**0.** the network is in netbox (http://localhost:8018/dcim/cables/); the lab
+is empty.
 
-**1. `./deploy`.** read netbox, map it into the lab's model, plan, apply, and
-show the running lab. plans `19 to create`, applies in about 15 seconds, and
-ends with `containerlab inspect`: four nodes running.
+**1. `./deploy`.** plans and applies `19 to create`.
 
-**2. `./pull-cable c1`.** takes cable `c1` out of the running lab at its first
-end, spine01 port e1-1:
+**2. `./pull-cable c1`.** deletes spine01's end of cable `c1`:
 
 ```text
 pull cable c1 at spine01 e1-1
-spark$ sudo docker exec clab-denog-spine01 ip link delete e1-1
+denog-lab$ sudo docker exec clab-denog-spine01 ip link delete e1-1
 ```
 
-**3. `./drift`.** read the lab, map it into netbox's model, and compare with
-netbox:
+**3. `./drift`.** exits 2:
 
 ```text
 drift report: 0 changed, 0 missing, 1 extra
@@ -65,18 +61,20 @@ extra (present in backend, not declared in intent):
 matching: 0 by state, 27 by key (27 adopted), 0 to create
 ```
 
-it exits 2. the compare step sends stderr to `/dev/null`: `--report` saves no
-state, so it would list all 27 objects it matched by key on every run.
+**4. `./deploy` again.** `1 to create`, cable `c1`.
 
-**4. `./deploy` again.** netbox is still the intent, so the plan is `1 to
-create`, cable `c1`, and the lab shows four nodes running.
+**5. `./monitor`.** every device becomes a ping target. grafana on the lab
+host, port 3000, shows the four nodes as reachable.
+
+**6.** the plugin's backends at http://localhost:8018/plugins/alembic/backends/:
+eleven targets, listed only.
 
 ## files
 
-- `lab.yaml`: the lab in containerlab's terms, only used to seed netbox.
-- `schemas/`: what each side reads, `netbox.yaml` and `lab.yaml`.
-- `maps/`: `netbox-to-lab.yaml` derives a node's image, kind and command from
-  its device type, `lab-to-netbox.yaml` the reverse (`transforms.star`).
-- `backends/`: netbox, and the lab over ssh.
-- `deploy`, `pull-cable`, `drift`: the steps, with `common.sh`. `teardown`
-  empties the lab for another run.
+- `lab.yaml`: the lab, used to seed netbox.
+- `schemas/`, `maps/`, `backends/`: what alembic reads, how it maps, where it
+  writes.
+- `netbox/`: the netbox image with the plugin and the backends it lists.
+- `monitoring/`: the monitoring stack.
+- `deploy`, `pull-cable`, `drift`, `monitor`: the steps. `teardown` empties
+  the lab.

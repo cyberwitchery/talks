@@ -1,6 +1,5 @@
 #!/bin/sh
-# netbox → lab: read netbox, reshape it into the lab's model, plan, apply, and
-# show what is running.
+# netbox → lab: import, map, plan, apply.
 . "$(dirname "$0")/common.sh"
 
 step "read netbox" \

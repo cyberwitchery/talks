@@ -1,0 +1,10 @@
+# blackbox ping targets for prometheus on the lab host.
+backend: external
+command: bin/monitoring-adapter
+setup:
+  out_path: denog-monitoring/targets/denog.json
+  job: blackbox
+  module: icmp
+  append_port: false
+  address_attr: address
+  label_attrs: [name, role]

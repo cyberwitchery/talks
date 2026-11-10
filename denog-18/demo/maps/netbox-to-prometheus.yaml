@@ -1,0 +1,22 @@
+# every netbox device becomes a ping target. containerlab names a node's
+# container clab-<lab>-<node>, and that name resolves on the lab network.
+schema:
+  types:
+    dcim.device:
+      key: { name: { type: slug } }
+      fields:
+        name: { type: slug }
+        role: { type: string }
+        address: { type: string }
+rules:
+  - name: targets
+    match: "dcim.device"
+    lookups:
+      role: { ref: "${attrs.role}", get: "key.slug" }
+    emit:
+      type: dcim.device
+      key: { name: "${key.name}" }
+      attrs:
+        name: "${attrs.name}"
+        role: "${lookup.role}"
+        address: "clab-denog-${attrs.name}"

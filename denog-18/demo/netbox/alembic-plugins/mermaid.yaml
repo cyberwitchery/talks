@@ -1,0 +1,4 @@
+# a mermaid diagram.
+# listed only; the adapter is not installed.
+backend: external
+command: /usr/local/bin/alembic-adapter-mermaid

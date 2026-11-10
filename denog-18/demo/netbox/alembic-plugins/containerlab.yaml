@@ -1,0 +1,4 @@
+# the lab on the lab host, driven live.
+# listed only; the adapter is not installed.
+backend: external
+command: /usr/local/bin/alembic-adapter-containerlab

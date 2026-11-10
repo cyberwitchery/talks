@@ -1,10 +1,9 @@
 #!/bin/sh
-# pulls a cable out of the running lab, the way someone would by hand: on one of
-# its nodes, delete the port's end of the link. netbox is not told.
+# deletes one end of a cable in the running lab. netbox is not told.
 . "$(dirname "$0")/common.sh"
 label="${1:?usage: ./pull-cable <cable label, e.g. c1>}"
 
-# the cable's a-side end, from the lab model deploy wrote
+# the cable's a-side, from lab.json
 end=$(jq -r --arg label "$label" '
   .objects as $o
   | ($o[] | select(.type == "dcim.cable" and .key.label == $label) | .attrs.a_terminations[0]) as $if

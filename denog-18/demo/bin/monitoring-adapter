@@ -1,0 +1,7 @@
+#!/bin/sh
+# the prometheus adapter, on the lab host over ssh.
+#
+#   LAB_HOST     ssh host that runs the monitoring (default: denog-lab)
+#   LAB_KEY      ssh identity for it, when the ssh config does not set one
+exec ssh -T -o BatchMode=yes ${LAB_KEY:+-i "$LAB_KEY" -o IdentitiesOnly=yes} \
+  "${LAB_HOST:-denog-lab}" bin/denog/alembic-adapter-prometheus

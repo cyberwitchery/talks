@@ -1,0 +1,18 @@
+#!/bin/sh
+# netbox → prometheus: import, map, plan, apply.
+. "$(dirname "$0")/common.sh"
+
+printf '\n\033[1mstart the monitoring\033[0m\n'
+lab 'cd denog-monitoring && docker compose up -d --quiet-pull 2>/dev/null'
+
+step "read netbox" \
+  bin/alembic import -f schemas/netbox.yaml --backend-config backends/netbox.yaml -o netbox.json
+step "map it into the monitoring's model" \
+  bin/alembic map -f netbox.json --spec maps/netbox-to-prometheus.yaml -o monitoring.json
+step "plan against prometheus" \
+  bin/alembic plan -f monitoring.json --backend-config backends/monitoring.yaml -o plan.json
+step "apply the plan" \
+  bin/alembic apply -p plan.json --backend-config backends/monitoring.yaml
+
+host=$(ssh -T -G "$LAB_HOST" | awk '$1 == "hostname" { print $2 }')
+printf '\n\033[1mgrafana: http://%s:3000/\033[0m\n' "$host"

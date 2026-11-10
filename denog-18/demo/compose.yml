@@ -1,5 +1,5 @@
-# a plain netbox for the demo, on localhost:8018. local demo only: every
-# secret here is a fixed placeholder.
+# netbox with the alembic plugin, on localhost:8018. the secrets are
+# placeholders.
 services:
   postgres:
     image: postgres:18-alpine
@@ -25,7 +25,8 @@ services:
       retries: 20
 
   netbox:
-    image: docker.io/netboxcommunity/netbox:v4.6.2
+    build: netbox
+    image: denog18-netbox
     depends_on:
       postgres:
         condition: service_healthy
@@ -49,6 +50,9 @@ services:
       SUPERUSER_EMAIL: admin@example.invalid
       SUPERUSER_PASSWORD: admin
       SKIP_SUPERUSER: "false"
+    volumes:
+      - ./netbox/plugins.py:/etc/netbox/config/plugins.py:ro
+      - ./netbox/alembic-plugins:/opt/alembic-plugins:ro
     healthcheck:
       test:
         [
