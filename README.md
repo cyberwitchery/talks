@@ -9,6 +9,10 @@ upstream.
 
 ## index
 
+- **ki-navigator-2026**: "ai architecture katas", learning by building small
+  models in plain python: a transformer, state space models and renormalizing
+  generative models, with live code (ki navigator 2026, first given at
+  europython 2026, lightly edited).
 - **dknog-2026**: "alembic demo", the live-demo half of a data-model-first
   network-automation talk (dknog 2026).
 - **denog-18**: "network automation for the modern age", data-model-driven
